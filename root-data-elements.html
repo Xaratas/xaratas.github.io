@@ -1,6 +1,7 @@
-<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="parser-behavior.html">
 <link rel="import" href="flowChartNode-elements.html">
+<link rel="import" href="questevent-elements.html">
 
 <!-- Quest Farbpalette
 	Hell: #EDEFFF
@@ -73,13 +74,12 @@
 
 <script>
 "use strict";
-	var QuestData = Polymer({
+	var QuestData = new Polymer({
 		is: "QuestData-element",
 		behaviors: [ParserBehavior],
 
 		created: function() {
 			this.type = "QuestData";
-			this.nodesMap = {};
 		},
 
 		// geht erstmal von text aus, hab noch kein file handling
@@ -141,18 +141,131 @@
 							});
 						}, this);
 					}
+					if(item.nodeName == "Bookmarks") {} // ignore
+					if(item.nodeName == "ClassExtender") {} // ignore
+					if(item.nodeName == "NextEventID") {
+						this.nextEventID = item.textContent;
+					}
+					if(item.nodeName == "NextEndStateID") {
+						this.nextEndStateID = item.textContent;
+					}
+					if(item.nodeName == "NextAddendumID") {
+						this.nextAddendumID = item.textContent;
+					}
+					if(item.nodeName == "Events") {
+						var node2, element2; // scoping regeln von js …
+						for(var y = 0; y < item.childNodes.length; y++) {
+							node2 = item.childNodes[y];
+							switch(node2.attributes[0].value) {
+								case "QuestEventGlobalVariable":
+									element2 = new QuestEventGlobalVariable();
+									break;
+								case "QuestEventAquire":
+									element2 = new QuestEventAquire();
+									break;
+								case "QuestEventInspect":
+									element2 = new QuestEventInspect();
+									break;
+								case "QuestEventInteract":
+									element2 = new QuestEventInteract();
+									break;
+								case "QuestEventKill":
+									element2 = new QuestEventKill();
+									break;
+								case "QuestEventLocation":
+									element2 = new QuestEventLocation();
+									break;
+								case "QuestEventTalk":
+									element2 = new QuestEventTalk();
+									break;
+							}
+							element2.fromXML(node2);
+							this.questEvents.push(element2);
+						}
+					}
+					if(item.nodeName == "QuestType") {
+						this.questType = PoeQuestEditor.QuestType[parseInt(item.textContent)];
+					}
 				}
 			}
 		},
 
 		toXML: function() {
 			var result = this.basetypecontent_toXML();
-			// todo nicht gleiches
-			return result + '</' + this.type + '>';
+			result += '<NextEventID>' + this.nextEventID + '</NextEventID>';
+			result += '<NextEndStateID>' + this.nextEventID + '</NextEndStateID>';
+			result += '<NextAddendumID>' + this.nextAddendumID + '</NextAddendumID>';
+			result += '<Events>';
+			for(var x = 0; x < this.questEvents.length; x++) {
+				result += this.questEvents[x].toXML();
+			}
+			result += '</Events>';
+			result += '<QuestType>'; // Ist als int im xml, Obsidian hat ihren Code selbst verhunzt -.-
+		    if(this.questType == PoeQuestEditor.QuestType[0]) { 
+				result += '0';
+			}
+			if(this.questType == PoeQuestEditor.QuestType[1]) {
+				result += '1';
+			}
+			if(this.questType == PoeQuestEditor.QuestType[2]) {
+				result += '2';
+			}
+			result += '</QuestType>';
+			return result += '</' + this.type + '>';
+		},
+
+
+		stringsFromXMLNode: function(node) {
+			var types = ["QuestNode", "ObjectiveNode"];
+			if(node.nodeName == "Entries") {
+				var entry;
+				for(var n = 0; n < node.childNodes.length; n++) {
+					entry = node.childNodes[n];
+					types.forEach(function(type) {
+						var id = entry.childNodes[0].textContent;
+						var textType = "title";
+						var flowChartNode;
+						if(id >= 10000 && id < 20000) {
+							id -= 10000;
+							textType = "description";
+						}
+						if(id >= 20000 && id < 30000) {
+							id -= 20000;
+							textType = "addendum";
+						}
+						if(id >= 30000) {
+							id -= 30000;
+							textType = "endState";
+							flowChartNode = this.nodesMap["QuestNode" + 0];
+							flowChartNode.setText(entry.childNodes[1].textContent, entry.childNodes[2].textContent, textType, id);
+						}
+						if(textType == "addendum") {
+							for(var i = 0; i < this.nodes.length; i++) {
+								if(this.nodes[i].type == "ObjectiveNode" && 
+										this.nodes[i].addendumIds.some(
+											function(val, index) { 
+												if(val.id == id) return true;
+											}
+										)) {
+									flowChartNode = this.nodes[i];
+									flowChartNode.setText(entry.childNodes[1].textContent, entry.childNodes[2].textContent, textType, id);
+									break;
+								}
+							}
+						}
+						if(textType == "description" || textType == "title") {
+							flowChartNode = this.nodesMap[type + id];
+							if(flowChartNode !== undefined) {
+								flowChartNode.setText(entry.childNodes[1].textContent, entry.childNodes[2].textContent, textType);
+							}
+						}
+					}, this);
+				}
+			}
 		}
 	});
 
-	var ConversationData = Polymer({
+	var ConversationData = new Polymer({
 		is: "ConversationData-element",
 		behaviors: [ParserBehavior],
 
@@ -167,7 +280,6 @@
 
 		created: function() {
 			this.type = "ConversationData";
-			this.nodesMap = {};
 		},
 
 		fromXML: function(xml) {
@@ -257,13 +369,13 @@
 					if(item.nodeName == "SceneTime") {} // ignore
 					if(item.nodeName == "CharacterMappings") {
 						if(item.hasChildNodes()) {
-							var node;
-							for(var i = 0; i < item.childNodes.length; i++) {
-								node = item.childNodes[i];
-								if(node.hasChildNodes()) {
-									var guid = node.childNodes[0].textContent;
-									var instanceTag = node.childNodes[1].textContent;
-									this.characterMappings[i] = {'guid' : guid, 'instanceTag': instanceTag};
+							var node2;
+							for(var j = 0; j < item.childNodes.length; j++) {
+								node2 = item.childNodes[j];
+								if(node2.hasChildNodes()) {
+									var guid = node2.childNodes[0].textContent;
+									var instanceTag = node2.childNodes[1].textContent;
+									this.characterMappings[j] = {'guid' : guid, 'instanceTag': instanceTag};
 								}
 							}
 						}
@@ -291,41 +403,18 @@
 			return result + '</' + this.type + '>';
 		},
 
-		
-		stringsFromXML: function(xml) { // TODO Als Global definieren
+		stringsFromXMLNode: function(node) {	
 			var types = ["TalkNode", "PlayerResponseNode", "TriggerConversationNode", "BankNode", "ScriptNode"];
-			if(typeof(xml) == "string") { // schon geparstes ist object
-				xml = this.parser.parseFromString(xml, 'text/xml');
-				this.cleanFormatting(xml);
-			}
-			if(xml.hasChildNodes()) {
-				var node;
-				for	(var x = 0; x < xml.childNodes.length; x++) {
-					node = xml.childNodes[x];
-					if(node.nodeName == "StringTableFile") {
-						this.stringsFromXML(node); // outer layer
-					}
-					if(node.nodeName == "Name") {
-						this.stringTableFileLink = node.textContent;
-					}
-					if(node.nodeName == "NextEntryID") {
-						this.nextEntryID = node.textContent; // nicht wirklich wichtig, vom tool aber es gibt illegale Werte bei Obsidian Files
-					}
-					if(node.nodeName == "EntryCount") {
-						this.entryCount = node.textContent;
-					}
-					if(node.nodeName == "Entries") {
-						var entry;
-						for(var n = 0; n < node.childNodes.length; n++) {
-							entry = node.childNodes[n];
-							types.forEach(function(type) {
-								var talkNode = this.nodesMap[type + entry.childNodes[0].textContent];
-								if(talkNode !== undefined) {
-									talkNode.setText(entry.childNodes[1].textContent, entry.childNodes[2].textContent);
-								}
-							}, this);
+			if(node.nodeName == "Entries") {
+				var entry;
+				for(var n = 0; n < node.childNodes.length; n++) {
+					entry = node.childNodes[n];
+					types.forEach(function(type) {
+						var talkNode = this.nodesMap[type + entry.childNodes[0].textContent];
+						if(talkNode !== undefined) {
+							talkNode.setText(entry.childNodes[1].textContent, entry.childNodes[2].textContent);
 						}
-					}
+					}, this);
 				}
 			}
 		}

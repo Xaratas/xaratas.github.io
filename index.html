@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+		<script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
 		<link rel="import" href="constants.html">
 		<link rel="import" href="constants-npc-guids.html">
 		<link rel="import" href="root-data-elements.html">
@@ -35,23 +35,23 @@
 			if(nodes.length > 0) {
 				console.log(nodes[0].toXML());
 			}
-			var nodes = document.getElementsByTagName("conversationdata-element");
+			nodes = document.getElementsByTagName("conversationdata-element");
 			if(nodes.length > 0) {
 				console.log(nodes[0].toXML());
 			}
-		};
+		}
 
 		function read_quest() {
 			var questData = new QuestData();
 			questData.fromXML(document.getElementById("questXML").value);
 			document.getElementsByTagName("body")[0].appendChild(questData);
-		};
+		}
 
 		function read_conversation() {
 			var conversationData = new ConversationData();
 			conversationData.fromXML(document.getElementById("conversationXML").value);
 			document.getElementsByTagName("body")[0].appendChild(conversationData);
-		};
+		}
 	
 		function read_stringtable_for_Conversation() {
 			// connect somehow, prototypisch
@@ -59,21 +59,21 @@
 			if(nodes.length > 0) {
 				nodes[nodes.length - 1].stringsFromXML(document.getElementById("stringTable").value);
 			}
-		};
+		}
 
 		function read_stringtable_for_Quest() {
 			var nodes = document.getElementsByTagName("questdata-element");
 			if(nodes.length > 0) {
 				nodes[nodes.length - 1].stringsFromXML(document.getElementById("stringTable").value);
 			}
-		};
+		}
 
 		function write_stringtable() {
 			var nodes = document.getElementsByTagName("conversationdata-element");
 			if(nodes.length > 0) {
 				console.log(nodes[0].stringsToXML());	
 			}
-		};
+		}
 	</script>
 	</head>
 	<body>
@@ -84,13 +84,13 @@
 		<h3>Nice examples</h3>
 		[gamepath]/data/quests/05_defiance_bay_heritage_hill/05_qst_rise_and_fall.quest <br />
 		[gamepath]/data/conversations/07_gilded_vale/07_bs_rh_ext_guard_01.conversation <br />
-		<h5>Tested and Works on: FF. Edit feature broken on Chrome and IE.</h5>
+		<h5>Tested and Works on: FF, Chrome and IE.</h5>
 		<div style="display:flex;">
 		<div style="display:flex;flex-direction: column;width: 260px;">
 		<button class="quest" onclick="read_quest()">Read Quest</button>
+		<button class="quest stringtable" onclick="read_stringtable_for_Quest()">Read Stringtable for last read quest</button>
 		<button class="conversation" onclick="read_conversation()">Read Conversation</button>
 		<button class="stringtable" onclick="read_stringtable_for_Conversation()">Read Stringtable for last read conversation</button>
-		<!--<button class="sttringtable" onclick="read_stringtable_for_Quest()">Read Stringtable for last read quest</button>-->
 		<button onclick="print_content()">write modified XML to console</button>
 		<button onclick="write_stringtable()">write modified Stringtable XML to console</button>
 		</div>
