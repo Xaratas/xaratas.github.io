@@ -1,4 +1,6 @@
+<link rel="import" href="functionCall-element.html">
 <link rel="import" href="functionCall-data-behavior.html">
+<link rel="import" href="betterselect-element.html">
 <!-- TODO select element in polymer mit Hinweisen, was die Einträge bewirken -->
 <dom-module id="Condition-element">
 	<style>
@@ -6,14 +8,19 @@
 			display: flex;
 			flex-direction: column;		 
 		}
+
+		functionCall-element[hide] {
+			display: none;
+		}
+
+		nestedConditions, operator {
+			border-left: 2px solid blue;
+			padding-left: 4px;
+		}
 	</style>
 	<template>
-		<div>Operator: <span>{{operator}}</span></div>
-		<div>Function:&nbsp;<span>{{not}}</span> <span>{{functionName}}</span></div>
-		<template is="dom-repeat" items="{{parameter}}">
-			<div>Parameter <span>{{index}}</span>: <span>{{item}}</span></div>
-		</template>
-
+		<functionCall-element hide$="[[isHidden]]" not="{{not}}" function_="{{fullFunction}}" parameter="{{parameter}}"></functionCall-element>
+		<operator>Operator: <select is="betterSelect-element" selectedvalue="{{operator::change}}" options_="{{options}}"></select></operator>
 		<nestedConditions></nestedConditions>
 	</template>
 </dom-module>
@@ -27,13 +34,17 @@
 		properties: {
 			operator: String,
 			type: String,
-			not: String,
-			nestedConditions: Array
-		},
+			not: Boolean,
+			nestedConditions: {
+				type: Array,
+				value: function() { return []; }
+			},
 
-		factoryImpl: function() {
-			this.nestedConditions = [];
-			this.parameter = [];
+			isHidden: Boolean,
+			options: {
+				type: Array,
+				value: function() { return PoeQuestEditor.LogicalOperator; }
+			}
 		},
 		
 		conditionalCall: function(xml) {
@@ -44,8 +55,7 @@
 					this.functionCallFromXML(node);
 				}
 				if (node.nodeName == "Not") {
-					if(node.textContent == "false") this.not = "";
-					else this.not = "!";
+					this.not = (node.textContent == "true");
 				}
 				if (node.nodeName == "Operator") {
 					this.operator = node.textContent;
@@ -53,6 +63,7 @@
 			}
 		},
 		conditionalExpression: function(xml) {
+			this.isHidden = true;
 			for(var i = 0; i < xml.childNodes.length; i++) {
 				if (xml.childNodes[i].nodeName == "Operator") {
 					this.operator = xml.childNodes[i].textContent;
@@ -95,13 +106,8 @@
 			if(this.type == "ConditionalCall") {
 				xml += '<ExpressionComponent xsi:type="' + this.type + '">'; 
 				xml += this.functionCallToXML();	
-				xml += '<Not>';
-				if (this.not === "")
-					xml += 'false';
-				else
-					xml += 'true';
-				xml += '</Not>' 
-					+ '<Operator>' + this.operator + '</Operator>';
+				xml += '<Not>' + this.not + '</Not>';
+				xml += '<Operator>' + this.operator + '</Operator>';
 				xml += '</ExpressionComponent>';
 			}
 			if(this.type == "ConditionalExpression") {
@@ -120,5 +126,6 @@
 			}
 			return xml;
 		}
+		
 	});
 </script>
