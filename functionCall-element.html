@@ -28,15 +28,15 @@
 			flex: 0 0 30px; /* ziemlich genau 30px */
 		}
 
-		span[hide], param0[hide], param1[hide], param2[hide], param3[hide], param4[hide] {
+		div[hide], span[hide], param0[hide], param1[hide], param2[hide], param3[hide], param4[hide] {
 			display: none;
 		}
 
-		// bestimmte inputs länger
+		/* bestimmte inputs länger */
 	</style>
 	<template>
-		<div>
-			<span>Inv.</span>
+		<div hide$="[[!isScript(type)]]">
+			<span>Not</span>
 			<span><paper-toggle-button checked="{{not}}"></paper-toggle-button></span>
 		</div>
 		<div>
@@ -87,18 +87,19 @@
 				type: Array,
 				value: function() { return []; },
 				notify: true
-			}
+			},
+			type: String
 		},
 		
-		factoryImpl: function(function_, parameterValues) {
+		factoryImpl: function(function_, parameterValues, type) {
 			this.function_ = function_;
 			this.parameter = parameterValues;
 		},
-
-		attached: function() {
+		// really performance heavy, so dont do this on attach, do it only when requested by the user to spread the needed time and decreasing performance over time
+		show: function() {
 			if(Object.keys(this.function_).length != 0) {
 				var edit;
-				edit = this.elementForType("Function");
+				edit = this.elementForType(this.type);
 				Polymer.dom(this.$$("func")).appendChild(edit);
 				if(this.function_.param0 !== undefined) {
 					edit = this.elementForType(this.function_.param0.type, 0);
@@ -129,10 +130,24 @@
 				return new BetterSelect(options, this.parameter[i]); // alle Enumerierten Konstanten
 			} else {
 				switch(type) {
-					case "Function":
+					case "Conditional":
 						return new BetterSelect(PoeQuestEditor.Conditionals_NameList, this.function_.name);
-					case "Guid":
-						return new BetterSelect(PoeQuestEditor.GUIDS_NameList, this.parameter[i]);
+					case "Script":
+						return new BetterSelect(PoeQuestEditor.Scripts_NameList, this.function_.name);
+					case "Guid": 
+						// Liste erweitern passiert im FunctionCallBehavior beim auslesen des XML, solange bis irgendwas ohne Performanceeinbußen eingesetzt wird.
+						//var instance = PoeQuestEditor.GUIDS.get(this.parameter[i]);
+						//if(instance === undefined) {
+							// unbekannte id
+						//	PoeQuestEditor.GUIDS.set(this.parameter[i], {instanceTag: this.parameter[i]});
+						//	PoeQuestEditor.GUIDS_NameList.push(this.parameter[i]);
+						//	PoeQuestEditor.GUIDS_byDisplayName.set(this.parameter[i], this.parameter[i]);
+						//}
+						return new BetterSelect(PoeQuestEditor.GUIDS_NameList, PoeQuestEditor.GUIDS.get(this.parameter[i]).instanceTag);
+					case "Boolean":
+						var button = document.createElement("paper-toggle-button");
+						button.checked = this.parameter[i];
+						return button;
 					case "Quest":
 					case "Conversation":
 					case "GlobalVariable":
@@ -147,14 +162,38 @@
 			return change.base[index] !== undefined;
 		},
 
-		functionChange: function(e, details, sender) {
-			if(this.function_.param0 !== undefined) this.$$("param0").children[0].remove(); //Polymer.dom(this.$$("param0")).removeChild(Polymer.dom(this.$$("param0").firstChild));
-			if(this.function_.param1 !== undefined) this.$$("param1").children[0].remove();
-			if(this.function_.param2 !== undefined) this.$$("param2").children[0].remove();
-			if(this.function_.param3 !== undefined) this.$$("param3").children[0].remove();
-			if(this.function_.param4 !== undefined) this.$$("param4").children[0].remove();
+		isScript: function(type) {
+			return type == "Script";
+		},
 
-			this.function_ = PoeQuestEditor.Conditionals_byDisplayName.get(details.value);
+		functionChange: function(e, details, sender) {
+			var elem;
+			if(this.function_.param0 !== undefined) {
+				elem = this.$$("param0").children[0];
+				if(elem !== undefined) elem.remove(); //Polymer.dom(this.$$("param0")).removeChild(Polymer.dom(this.$$("param0").firstChild));
+			}
+			if(this.function_.param1 !== undefined) {
+				elem = this.$$("param1").children[0];
+				if(elem !== undefined) elem.remove();
+		   	}
+			if(this.function_.param2 !== undefined) {
+				elem = this.$$("param2").children[0];
+				if(elem !== undefined) elem.remove(); 
+			}
+			if(this.function_.param3 !== undefined) {
+				elem = this.$$("param3").children[0];
+				if(elem !== undefined) elem.remove();
+		   	}
+			if(this.function_.param4 !== undefined) {
+				elem = this.$$("param4").children[0];
+				if(elem !== undefined) elem.remove();
+		   	}
+			
+			if(this.type == "Conditional") {
+				this.function_ = PoeQuestEditor.Conditionals_byDisplayName.get(details.value);
+			} else {
+				this.function_ = PoeQuestEditor.Scripts_byDisplayName.get(details.value);
+			}
 			var edit;
 			// parameter anpassen
 			this.parameter = [];

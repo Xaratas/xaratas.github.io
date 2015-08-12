@@ -4,18 +4,19 @@
 		<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
 		<link rel="import" href="bower_components/polymer/polymer.html">
 		<link rel="import" href="../bower_components/iron-input/iron-input.html">
-		<link rel="import" href="test.html">
+		<link rel="import" href="./test2.html">
 		<script>
 			 document.addEventListener('WebComponentsReady', function() {
+				 var a = new TestElement();
+						var secondElement = new TestElement();
+						a.push('conditions', secondElement);
+						Polymer.dom(a.$$("conditions")).appendChild(secondElement);
+				
+				 document.getElementsByTagName('body')[0].appendChild(a);
 			 });
 
 		</script>
-
 	</head>
 	<body>
-		0?: <test-element value=0 ></test-element> <br />
-		1 : <test-element value=1 ></test-element> <br />
-		0?: <test-element value="0" ></test-element> <br />
-		1 : <test-element value="1" ></test-element>
 	</body>
 </html>

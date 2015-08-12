@@ -11,6 +11,14 @@ var FunctionCallBehavior = {
 		parameter: {
 			type: Array,
 			value: function() { return []; }
+		},
+		wasShown: Boolean
+	},
+	
+	show: function() {
+		if(this.wasShown != true) {
+			this.wasShown = true;
+			this.$$('functionCall-element').show();
 		}
 	},
 
@@ -20,9 +28,26 @@ var FunctionCallBehavior = {
 			data = xml.childNodes[x];
 			if (data.nodeName == "FullName") {
 				this.fullFunction = PoeQuestEditor.Conditionals.get(data.textContent);
+				if(this.fullFunction === undefined) {
+					this.fullFunction = PoeQuestEditor.Scripts.get(data.textContent);
+				}
 			}
 			if (data.nodeName == "Parameters") {
 				for (var p = 0; p < data.childNodes.length; p++) {
+					if((this.fullFunction.param0 !== undefined && this.fullFunction.param0.type == "Guid") ||
+						(this.fullFunction.param1 !== undefined && this.fullFunction.param1.type == "Guid") ||
+						(this.fullFunction.param2 !== undefined && this.fullFunction.param2.type == "Guid") ||
+						(this.fullFunction.param3 !== undefined && this.fullFunction.param3.type == "Guid") ||
+						(this.fullFunction.param4 !== undefined && this.fullFunction.param4.type == "Guid") ||
+						(this.fullFunction.param5 !== undefined && this.fullFunction.param5.type == "Guid") ||
+						(this.fullFunction.param6 !== undefined && this.fullFunction.param6.type == "Guid")) {
+						var known = PoeQuestEditor.GUIDS.get(data.childNodes[p].textContent);
+						if(known === undefined) {
+							PoeQuestEditor.GUIDS.set(data.childNodes[p].textContent, {instanceTag: data.childNodes[p].textContent, files: []});
+							PoeQuestEditor.GUIDS_NameList.push(data.childNodes[p].textContent);
+							PoeQuestEditor.GUIDS_byDisplayName.set(data.childNodes[p].textContent, data.childNodes[p].textContent);
+						}
+					}
 					this.push('parameter', data.childNodes[p].textContent);
 				}
 			}
@@ -30,7 +55,13 @@ var FunctionCallBehavior = {
 	},
 
 	functionCallToXML: function() {	
-		var xml = '<Data><FullName>' + PoeQuestEditor.Conditionals_fromDisplayName.get(this.fullFunction.name) + '</FullName>' + '<Parameters>';
+		var xml = '<Data><FullName>';
+		var functionxml = PoeQuestEditor.Conditionals_fromDisplayName.get(this.fullFunction.name);
+		if(functionxml === undefined) {
+			functionxml = PoeQuestEditor.Scripts_fromDisplayName.get(this.fullFunction.name);
+		}
+		xml += functionxml;
+		xml += '</FullName>' + '<Parameters>';
 		this.parameter.forEach(function (parameter) {
 			xml += '<string>' + parameter + '</string>';
 		});
