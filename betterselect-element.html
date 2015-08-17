@@ -1,17 +1,8 @@
-
-<dom-module id="betterselect-element">
-	<style>
-		:host {
-			/* max-width: inherit; /* Funzt nicht im ff*/
-		}
-	</style>
-	<template>
-		<template is="dom-repeat" items="{{options_}}">
-			<option>{{item}}</option>
-		</template>
-	</template>
-</dom-module>
-<script>
+<dom-module id="betterselect-element"><template><style>
+			:host {
+				/* max-width: inherit; /* Funzt nicht im ff*/
+			}
+		</style><template is="dom-repeat" items="{{options_}}"><option>{{item}}</option></template></template></dom-module><script>
 "use strict";
 	var BetterSelect = new Polymer({
 		is: "betterselect-element",

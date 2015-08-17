@@ -1,96 +1,62 @@
-<link rel="import" href="../bower_components/iron-input/iron-input.html">
-<link rel="import" href="../bower_components/iron-signals/iron-signals.html">
-
-<dom-module id="stringtable-viewer">
-	<style>
-		:host {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			width: 100%;
-			z-index: 3000;
-			background-color: white;
-			height: 140px;
-		}
-		iron-signals {
-			height: inherit;
-		}
-
-		:host wrap {
-			display: flex;
-			height: inherit;
-		}
-
-		.column {
-			display: flex;
-			flex-direction: column;
-		}
-
-		.left {
-			flex-grow: 1;
-		}
-
-		.right {
-			flex-grow: 5;
-			position: relative;
-		}
-
-		textarea {
-			flex-grow: 1; 
-		}
-
-		#addendumpanel {
-			background-color: white;
-			height: 83%;
-			left: 0;
-	    	position: absolute;
-			top: 0;
-			width: 100%;
-			display: flex;
-		}
-		
-		textarea[hide], div[hide], #addendumpanel[hide] {
-			display: none;
-		}
-
-
-		#addendumpanel label {
-			margin-right: 5px;
-		}
-	</style>
-	<template>
-		<iron-signals on-iron-signal-flow-chart-node-selected="flowChartNodeSelected"></iron-signals>
-		<wrap>
-			<div class="column left">
-				<span>Selected Node: <span>{{nodeId}}</span></span>
-				<span>
-					<label for="showDefaultText">Default Text</label>
-					<input id="showDefaultText" type="checkbox" checked="{{showText::change}}" />
-				</span>
-				<span>
-					<label for"showFemaleText">Female Text</label>
-					<input id="showFemaleText" type="checkbox" checked="{{showFemaleText::change}}" />
-				</span>
-			</div>
-			<div class="column right" hide$="[[isQuest]]">
-				<textarea id="text" hide$="[[!showText]]" value="{{defaultText::input}}" placeholder="default text"></textarea>
-				<textarea id="femaleText" hide$="[[!showFemaleText]]" value="{{femaleText::input}}" placeholder="female text"></textarea>
-			</div>
-			<div class="column right" hide$="[[isConversation]]">
-				<input is="iron-input" bind-value="{{title}}" placeholder="quest step title" />
-				<textarea id="description" value="{{description::input}}" placeholder="quest step description"></textarea>
-				<button on-click="toggleAddendums">{{showButtonText(nodeId, isHidden)}}</button>
-				<div id="addendumpanel" hide$="[[isHidden]]"> <!-- element hat ein display wert gesetzt, hidden ist schwächer als display -->
-					<template is="dom-repeat" items="{{addendums}}">
-						<label>{{item.id}}</label><textarea value="{{item.text}}" placeholder="quest addendum"></textarea>
-					</template>
-				</div>
-			</div>
-		</wrap>
-	</template>
-</dom-module>
-
-<script>
+<link rel="import" href="../bower_components/iron-input/iron-input.html"><link rel="import" href="../bower_components/iron-signals/iron-signals.html"><dom-module id="stringtable-viewer"><template><style>
+			:host {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				z-index: 3000;
+				background-color: white;
+				height: 140px;
+			}
+			iron-signals {
+				height: inherit;
+			}
+	
+			:host wrap {
+				display: flex;
+				height: inherit;
+			}
+	
+			.column {
+				display: flex;
+				flex-direction: column;
+			}
+	
+			.left {
+				flex-grow: 1;
+			}
+	
+			.right {
+				flex-grow: 5;
+				position: relative;
+			}
+	
+			textarea {
+				flex-grow: 1; 
+			}
+	
+			#addendumpanel {
+				background-color: white;
+				height: 83%;
+				left: 0;
+		    	position: absolute;
+				top: 0;
+				width: 100%;
+				display: flex;
+			}
+			
+			textarea[hide], div[hide], #addendumpanel[hide] {
+				display: none;
+			}
+			
+			#questEvents {
+				overflow: scroll;
+			}
+	
+			#addendumpanel label {
+				margin-right: 5px;
+			}
+		</style><iron-signals on-iron-signal-flow-chart-node-selected="flowChartNodeSelected"></iron-signals><wrap><div id="questEvents" class="column leftleft"><span>QuestEvents</span></div><div class="column left"><span>Selected Node: <span>{{nodeId}}</span></span> <span><label for="showDefaultText">Default Text</label> <input id="showDefaultText" type="checkbox" checked="{{showText::change}}"></span> <span><label for"showfemaletext"="">Female Text</label> <input id="showFemaleText" type="checkbox" checked="{{showFemaleText::change}}"></span></div><div class="column right" hide$="[[isQuest]]"><textarea id="text" hide$="[[!showText]]" value="{{defaultText::input}}" placeholder="default text"></textarea> <textarea id="femaleText" hide$="[[!showFemaleText]]" value="{{femaleText::input}}" placeholder="female text"></textarea></div><div class="column right" hide$="[[isConversation]]"><input is="iron-input" bind-value="{{title}}" placeholder="quest step title"> <textarea id="description" value="{{description::input}}" placeholder="quest step description"></textarea> <button on-click="toggleAddendums">{{showButtonText(nodeId, isHidden)}}</button><div id="addendumpanel" hide$="[[isHidden]]"><template is="dom-repeat" items="{{addendums}}"><label>{{item.id}}</label><textarea value="{{item.text}}" placeholder="quest addendum"></textarea></template></div></div></wrap></template></dom-module><script>
 "use strict";
 	var StringtableViewer = new Polymer({
 		is: "stringtable-viewer",
@@ -115,6 +81,10 @@
 				observer: 'femaleTextChanged'
 			},
 			addendums: {
+				type: Array,
+				value: function() { return []; }
+			},
+			questEvents: {
 				type: Array,
 				value: function() { return []; }
 			},
@@ -143,6 +113,12 @@
 			if(this.sourceNode.type == "QuestNode" || this.sourceNode.type == "ObjectiveNode") {
 			    this.title = this.sourceNode.defaultText;	
 				this.description = this.sourceNode.description;
+				this.questEvents = this.sourceNode.parent_.questEvents;
+
+				for(var i = 0; i < this.questEvents.length; i++) {
+					Polymer.dom(this.$.questEvents).appendChild(this.questEvents[i]);
+				}
+
 				this.isQuest = true; 
 				this.isConversation = false;
 			} else {

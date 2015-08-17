@@ -1,6 +1,4 @@
-<link rel="import" href="constants.html">
-<link rel="import" href="constants-conditionals.html">
-<script>
+<link rel="import" href="constants.html"><link rel="import" href="constants-conditionals.html"><script>
 "use strict";
 var FunctionCallBehavior = {
 	properties: {
@@ -16,7 +14,7 @@ var FunctionCallBehavior = {
 	},
 	
 	show: function() {
-		if(this.wasShown != true) {
+		if(this.wasShown !== true) {
 			this.wasShown = true;
 			this.$$('functionCall-element').show();
 		}

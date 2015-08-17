@@ -1,78 +1,42 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="parser-behavior.html">
-<link rel="import" href="flowChartNode-elements.html">
-<link rel="import" href="questevent-elements.html">
+<link rel="import" href="../bower_components/polymer/polymer.html"><link rel="import" href="parser-behavior.html"><link rel="import" href="flowChartNode-elements.html"><link rel="import" href="questevent-elements.html"><dom-module id="questdata-element"><template><style>
+			:host {
+				display: flex;
+			}
+	
+			:host > ::content > div {
+				display:flex;
+				flex-direction: column;
+				margin-left: 30px;
+				margin-right: 30px;
+			}
+	
+			:host > ::content > div:first-child {
+				margin-left: 0;	
+			}
+	
+			:host > ::content > div:last-child {
+				margin-right: 0;
+			}
+		</style><content></content></template></dom-module><dom-module id="conversationdata-element"><template><style>
+			:host {
+				display: flex;
+			}
 
-<!-- Quest Farbpalette
-	Hell: #EDEFFF
-	hell blau: #A9D3FF
-	mittel blau: #96C5F7
-	dunkel blau: #75A6C6
-	highlight grün: #6782A7
--->	
+			:host > ::content > div {
+				display:flex;
+				flex-direction: column;
+				margin-left: 30px;
+				margin-right: 30px;
+			}
 
-<dom-module id="questdata-element">
-	<style>
-		:host {
-			display: flex;
-		}
-
-		:host > ::content > div {
-			display:flex;
-			flex-direction: column;
-			margin-left: 30px;
-			margin-right: 30px;
-		}
-
-		:host > ::content > div:first-child {
-			margin-left: 0;	
-		}
-
-		:host > ::content > div:last-child {
-			margin-right: 0;
-		}
-	</style>
-	<template>
-		<content></content>
-	</template>
-</dom-module>
-
-<!-- Farbpalette:
-	Hell: #D1FCF0
-	helles cyan: #9FD8CB
-	muted grün: #8FC0A9
-	ocker: #ADBF97
-	highlight muted gelb: #E2EB98
--->
-
-<dom-module id="conversationdata-element">
-	<style>
-		:host {
-			display: flex;
-		}
-
-		:host > ::content > div {
-			display:flex;
-			flex-direction: column;
-			margin-left: 30px;
-			margin-right: 30px;
-		}
-
-		:host > ::content > div:first-child {
-			margin-left: 0;	
-		}
-	   
-		:host > ::content > div:last-child {
-			margin-right: 0;
-		}
-	</style>
-
-	<template>
-		<content></content>
-	</template>
-</dom-module>
-
-<script>
+			:host > ::content > div:first-child {
+				margin-left: 0;	
+			}
+		   
+			:host > ::content > div:last-child {
+				margin-right: 0;
+			}
+		</style><content></content></template></dom-module><script>
 "use strict";
 	var QuestData = new Polymer({
 		is: "questdata-element",

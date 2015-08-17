@@ -1,12 +1,4 @@
-<link rel="import" href="../bower_components/iron-input/iron-input.html">
-<dom-module id="comment-element">
-	<style></style>
-	<template>
-		<input is="iron-input" bind-value="{{comment}}" placeholder="comment">
-		<button on-click="remove">x</button>
-	</template>
-</dom-module>
-<script>
+<link rel="import" href="../bower_components/iron-input/iron-input.html"><dom-module id="comment-element"><template><style></style><input is="iron-input" bind-value="{{comment}}" placeholder="comment"> <button on-click="remove">x</button></template></dom-module><script>
 "use strict";
 	var Comment = new Polymer({
 		is: "comment-element",

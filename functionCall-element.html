@@ -1,73 +1,32 @@
-<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html"><link rel="import" href="../bower_components/iron-icon/iron-icon.html"><link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html"><link rel="import" href="polishedIron-input.html"><dom-module id="functioncall-element"><template><style>
+			:host {
+				display: flex;
+			}
+			div {
+				display: flex;
+				flex-direction: column;
+			}
+			span, func, param0, param1, param2, param3, param4 {
+			}
 
-<link rel="import" href="polishedIron-input.html">
-<dom-module id="functioncall-element">
-	<style>
-		:host {
-			display: flex;
-		}
-		div {
-			display: flex;
-			flex-direction: column;
-		}
-		span, func, param0, param1, param2, param3, param4 {
-		}
+			func, param0, param1, param2, param3, param4 {
+				max-width: 200px;
+				display: flex;
+			}
 
-		func, param0, param1, param2, param3, param4 {
-			max-width: 200px;
-			display: flex;
-		}
+			func {
+			}
 
-		func {
-		}
+			span:first-child {
+				flex: 0 0 22px; /* ziemlich genau 22px höhe */
+			}
 
-		span:first-child {
-			flex: 0 0 22px; /* ziemlich genau 22px höhe */
-		}
+			div[hide], span[hide], param0[hide], param1[hide], param2[hide], param3[hide], param4[hide] {
+				display: none;
+			}
 
-		div[hide], span[hide], param0[hide], param1[hide], param2[hide], param3[hide], param4[hide] {
-			display: none;
-		}
-
-		/* bestimmte inputs länger */
-	</style>
-	<template>
-		<div hide$="[[!isScript(type)]]">
-			<span>Not</span>
-			<span><paper-toggle-button checked="{{not}}"></paper-toggle-button></span>
-		</div>
-		<div>
-			<span>Name</span>
-		   	<func on-value-changed="functionChange"></func>
-		</div>
-		<div>
-			<span hide$="[[!hidden(parameter.*, 0)]]" title="[[function_.param0.description]]">{{function_.param0.name}}</span>
-			<param0 on-value-changed="input0Change" on-bind-value-changed="input0Change" hide$="[[!hidden(parameter.*, 0)]]"></param0>
-		</div>
-		<div>
-			<span hide$="[[!hidden(parameter.*, 1)]]" title="[[function_.param1.description]]">{{function_.param1.name}}</span>
-			<param1 on-value-changed="input1Change" on-bind-value-changed="input1Change" hide$="[[!hidden(parameter.*, 1)]]"></param1>
-		</div>
-		<div>
-			<span hide$="[[!hidden(parameter.*, 2)]]" title="[[function_.param2.description]]">{{function_.param2.name}}</span>
-			<param2 on-value-changed="input2Change" on-bind-value-changed="input2Change" hide$="[[!hidden(parameter.*, 2)]]"></param2> 
-		</div>
-		<div>
-			<span hide$="[[!hidden(parameter.*, 3)]]" title="[[function_.param3.description]]">{{function_.param3.name}}</span>
-			<param3 on-value-changed="input3Change" on-bind-value-changed="input3Change" hide$="[[!hidden(parameter.*, 3)]]"></param3>
-		</div>
-		<div>
-			<span hide$="[[!hidden(parameter.*, 4)]]" title="[[function_.param4.description]]">{{function_.param4.name}}</span>
-			<param4 on-value-changed="input4Change" on-bind-value-changed="input4Change" hide$="[[!hidden(parameter.*, 4)]]"></param4>
-		</div>
-		<div>
-			<iron-icon icon="help" title="[[function_.description]]"></iron-icon>
-		</div>
-	</template>
-</dom-module>
-<script>
+			/* bestimmte inputs länger */
+		</style><div hide$="[[!isScript(type)]]"><span>Not</span> <span><paper-toggle-button checked="{{not}}"></paper-toggle-button></span></div><div><span>Name</span><func on-value-changed="functionChange"></func></div><div><span hide$="[[!hidden(parameter.*, 0)]]" title="[[function_.param0.description]]">{{function_.param0.name}}</span><param0 on-value-changed="input0Change" on-bind-value-changed="input0Change" hide$="[[!hidden(parameter.*, 0)]]"></param0></div><div><span hide$="[[!hidden(parameter.*, 1)]]" title="[[function_.param1.description]]">{{function_.param1.name}}</span><param1 on-value-changed="input1Change" on-bind-value-changed="input1Change" hide$="[[!hidden(parameter.*, 1)]]"></param1></div><div><span hide$="[[!hidden(parameter.*, 2)]]" title="[[function_.param2.description]]">{{function_.param2.name}}</span><param2 on-value-changed="input2Change" on-bind-value-changed="input2Change" hide$="[[!hidden(parameter.*, 2)]]"></param2></div><div><span hide$="[[!hidden(parameter.*, 3)]]" title="[[function_.param3.description]]">{{function_.param3.name}}</span><param3 on-value-changed="input3Change" on-bind-value-changed="input3Change" hide$="[[!hidden(parameter.*, 3)]]"></param3></div><div><span hide$="[[!hidden(parameter.*, 4)]]" title="[[function_.param4.description]]">{{function_.param4.name}}</span><param4 on-value-changed="input4Change" on-bind-value-changed="input4Change" hide$="[[!hidden(parameter.*, 4)]]"></param4></div><div><iron-icon icon="help" title="[[function_.description]]"></iron-icon></div></template></dom-module><script>
 "use strict";
 	var FunctionCallElement = new Polymer({
 		is: 'functioncall-element',
@@ -96,7 +55,7 @@
 		},
 		// really performance heavy, so dont do this on attach, do it only when requested by the user to spread the needed time and decreasing performance over time
 		show: function() {
-			if(Object.keys(this.function_).length != 0) {
+			if(Object.keys(this.function_).length !== 0) {
 				var edit;
 				edit = this.elementForType(this.type);
 				Polymer.dom(this.$$("func")).appendChild(edit);
