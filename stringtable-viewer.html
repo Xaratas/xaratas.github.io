@@ -56,7 +56,7 @@
 			#addendumpanel label {
 				margin-right: 5px;
 			}
-		</style><iron-signals on-iron-signal-flow-chart-node-selected="flowChartNodeSelected"></iron-signals><wrap><div id="questEvents" class="column leftleft"><span>QuestEvents</span></div><div class="column left"><span>Selected Node: <span>{{nodeId}}</span></span> <span><label for="showDefaultText">Default Text</label> <input id="showDefaultText" type="checkbox" checked="{{showText::change}}"></span> <span><label for"showfemaletext"="">Female Text</label> <input id="showFemaleText" type="checkbox" checked="{{showFemaleText::change}}"></span></div><div class="column right" hide$="[[isQuest]]"><textarea id="text" hide$="[[!showText]]" value="{{defaultText::input}}" placeholder="default text"></textarea> <textarea id="femaleText" hide$="[[!showFemaleText]]" value="{{femaleText::input}}" placeholder="female text"></textarea></div><div class="column right" hide$="[[isConversation]]"><input is="iron-input" bind-value="{{title}}" placeholder="quest step title"> <textarea id="description" value="{{description::input}}" placeholder="quest step description"></textarea> <button on-click="toggleAddendums">{{showButtonText(nodeId, isHidden)}}</button><div id="addendumpanel" hide$="[[isHidden]]"><template is="dom-repeat" items="{{addendums}}"><label>{{item.id}}</label><textarea value="{{item.text}}" placeholder="quest addendum"></textarea></template></div></div></wrap></template></dom-module><script>
+		</style><iron-signals on-iron-signal-flow-chart-node-selected="flowChartNodeSelected"></iron-signals><wrap><div id="questEvents" class="column leftleft" on-value-changed="changeQuestEvent"><span>QuestEvents</span></div><div class="column left"><span>Selected Node: <span>{{nodeId}}</span></span> <span><label for="showDefaultText">Default Text</label> <input id="showDefaultText" type="checkbox" checked="{{showText::change}}"></span> <span><label for"showfemaletext"="">Female Text</label> <input id="showFemaleText" type="checkbox" checked="{{showFemaleText::change}}"></span></div><div class="column right" hide$="[[isQuest]]"><textarea id="text" hide$="[[!showText]]" value="{{defaultText::input}}" placeholder="default text"></textarea> <textarea id="femaleText" hide$="[[!showFemaleText]]" value="{{femaleText::input}}" placeholder="female text"></textarea></div><div class="column right" hide$="[[isConversation]]"><input is="iron-input" bind-value="{{title}}" placeholder="quest step title"> <textarea id="description" value="{{description::input}}" placeholder="quest step description"></textarea> <button on-click="toggleAddendums">{{showButtonText(nodeId, isHidden)}}</button><div id="addendumpanel" hide$="[[isHidden]]"><template is="dom-repeat" items="{{addendums}}"><label>{{item.id}}</label><textarea value="{{item.text}}" placeholder="quest addendum"></textarea></template></div></div></wrap></template></dom-module><script>
 "use strict";
 	var StringtableViewer = new Polymer({
 		is: "stringtable-viewer",
@@ -106,6 +106,10 @@
 		},
 
 		flowChartNodeSelected: function(e, data, sender) {
+			var skipEvents = false;
+			if(this.sourceNode !== undefined && this.sourceNode.parent_ === data[0]) {
+				skipEvents = true;
+			}
 			this.sourceNode = data[0]; // erst this, dann kann der observer oben nichts überschreiben
 			this.nodeId = this.sourceNode.nodeId;
 			this.defaultText = this.sourceNode.defaultText;
@@ -113,10 +117,21 @@
 			if(this.sourceNode.type == "QuestNode" || this.sourceNode.type == "ObjectiveNode") {
 			    this.title = this.sourceNode.defaultText;	
 				this.description = this.sourceNode.description;
-				this.questEvents = this.sourceNode.parent_.questEvents;
-
-				for(var i = 0; i < this.questEvents.length; i++) {
-					Polymer.dom(this.$.questEvents).appendChild(this.questEvents[i]);
+				if(skipEvents || this.questEvents.length == this.sourceNode.parent_.questEvents.length && 
+						this.questEvents.every(
+							function(current, index, array) { 
+								return current == this.sourceNode.parent_.questEvents[index];
+							}, this)) {
+					// alles gleich, also mache mal nix
+				} else {
+					// aufräumen, kein forEach, das ist doch ne nodelist …
+					for(var j = 0; j < this.questEvents.length; j++) {
+						Polymer.dom(this.$.questEvents).removeChild(this.questEvents[j]);
+					}
+					this.questEvents = this.sourceNode.parent_.questEvents;
+					for(var i = 0; i < this.questEvents.length; i++) {
+						Polymer.dom(this.$.questEvents).appendChild(this.questEvents[i]);
+					}
 				}
 
 				this.isQuest = true; 
@@ -159,6 +174,20 @@
 					word = "hide" + word;
 			}
 			return word;
+		},
+
+		changeQuestEvent: function(e, details) {
+			var orginal = e.target.parentElement.parentElement.parentElement.parentElement;
+			var newQuestEvent = new window[details.value]();
+			newQuestEvent.$$('questevent-element').id = orginal.$$('questevent-element').id;
+			newQuestEvent.$$('questevent-element').displayName = orginal.$$('questevent-element').displayName;
+			for(var j = 0; j < this.questEvents.length; j++) {
+				Polymer.dom(this.$.questEvents).removeChild(this.questEvents[j]);
+			}
+			this.splice("questEvents", this.questEvents.indexOf(orginal), 1, newQuestEvent);
+			for(var i = 0; i < this.questEvents.length; i++) {
+				Polymer.dom(this.$.questEvents).appendChild(this.questEvents[i]);
+			}
 		}
 	});
 </script>

@@ -11,42 +11,46 @@
 			.small {
 				max-width: 30px;
 			}
-		</style><span><span>{{displayName}}</span>:</span> <span><div><span>ID</span> <input is="iron-input" bind-value="{{id}}" class="small"></div><div><span>Type</span><select is="betterselect-element" options_="{{options}}" selectedvalue="{{type}}"></select></div><div><span>{{param0_name}}</span> <input is="iron-input" bind-value="{{param0_value}}"></div><div><span>{{param1_name}}</span> <input is="iron-input" bind-value="{{param1_value}}"></div></span></template></dom-module><dom-module id="questevent-globalvariable-element"><template><style>
+
+			div[hide] {
+				visibility: hidden;
+			}
+		</style><span>Name:&nbsp;<input is="iron-input" bind-value="{{displayName}}"></span> <span><div><span>ID</span> <input is="iron-input" bind-value="{{id}}" class="small"></div><div><span>Type</span><select is="betterselect-element" options_="{{options}}" selectedvalue="{{type}}"></select></div><div><span>{{param0_name}}</span> <input is="iron-input" bind-value="{{param0_value}}"></div><div hide$="[[isHidden(param1_name)]]"><span>{{param1_name}}</span> <input is="iron-input" bind-value="{{param1_value}}"></div></span></template></dom-module><dom-module id="questevent-globalvariable-element"><template><style>
 			:host {
 				background-color: lightblue;
 				margin-bottom: 5px;
 			}
-		</style><questevent-element param0_name="Variable" param0_value="{{variableName}}" param1_name="Value" param1_value="{{variableValue}}"></questevent-element></template></dom-module><dom-module id="questevent-aquire-element"><template><style>
+		</style><questevent-element param0_name="Variable" param0_value="{{variableName}}" param1_name="Value" param1_value="{{variableValue}}" type="QuestEventGlobalVariable"></questevent-element></template></dom-module><dom-module id="questevent-aquire-element"><template><style>
 			:host {
 				background-color: lightblue;
 				margin-bottom: 5px;
 			}
-		</style><questevent-element param0_name="Item" param0_value="{{item}}"></questevent-element></template></dom-module><dom-module id="questevent-inspect-element"><template><style>
+		</style><questevent-element param0_name="Item" param0_value="{{item}}" param1_name="" type="QuestEventAquire"></questevent-element></template></dom-module><dom-module id="questevent-inspect-element"><template><style>
 			:host {
 				background-color: lightblue;
 				margin-bottom: 5px;
 			}
-		</style><questevent-element param0_name="Item" param0_value="{{item}}"></questevent-element></template></dom-module><dom-module id="questevent-interact-element"><template><style>
+		</style><questevent-element param0_name="Item" param0_value="{{item}}" param1_name="" type="QuestEventInspect"></questevent-element></template></dom-module><dom-module id="questevent-interact-element"><template><style>
 			:host {
 				background-color: lightblue;
 				margin-bottom: 5px;
 			}
-		</style><questevent-element param0_name="Object" param0_value="{{object}}"></questevent-element></template></dom-module><dom-module id="questevent-kill-element"><template><style>
+		</style><questevent-element param0_name="Object" param0_value="{{object}}" param1_name="" type="QuestEventInteract"></questevent-element></template></dom-module><dom-module id="questevent-kill-element"><template><style>
 			:host {
 				background-color: lightblue;
 				margin-bottom: 5px;
 			}
-		</style><questevent-element param0_name="Target" param0_value="{{target}}" param1_name="Amount" param1_value="{{totalToKill}}"></questevent-element></template></dom-module><dom-module id="questevent-location-element"><template><style>
+		</style><questevent-element param0_name="Target" param0_value="{{target}}" param1_name="Amount" param1_value="{{totalToKill}}" type="QuestEventKill"></questevent-element></template></dom-module><dom-module id="questevent-location-element"><template><style>
 			:host {
 				background-color: lightblue;
 				margin-bottom: 5px;
 			}
-		</style><questevent-element param0_name="TriggerObject" param0_value="{{triggerObject}}"></questevent-element></template></dom-module><dom-module id="questevent-talk-element"><template><style>
+		</style><questevent-element param0_name="TriggerObject" param0_value="{{triggerObject}}" param1_name="" type="QuestEventLocation"></questevent-element></template></dom-module><dom-module id="questevent-talk-element"><template><style>
 			:host {
 				background-color: lightblue;
 				margin-bottom: 5px;
 			}
-		</style><questevent-element param0_name="Conversation" param0_value="{{conversation}}" param1_name="Node ID" param1_value="{{nodeId}}"></questevent-element></template></dom-module><script>
+		</style><questevent-element param0_name="Conversation" param0_value="{{conversation}}" param1_name="Node ID" param1_value="{{nodeId}}" type="QuestEventTalk"></questevent-element></template></dom-module><script>
 "use strict";
 var QuestEventElement = new Polymer({
 	is: "questevent-element",
@@ -55,12 +59,19 @@ var QuestEventElement = new Polymer({
 	properties: {
 		param0_Name: String,
 		param0_Value: String,
-		param1_Name: String,
+		param1_Name: {
+			type: String,
+			value: ""
+		},
 		param1_Value: String,
 		options: {
 			type: Array,
 			value: PoeQuestEditor.QuestEvents
 		}
+	},
+
+	isHidden: function(newValue) {
+		return newValue === undefined || newValue.length === 0;
 	}
 });
 
@@ -87,7 +98,7 @@ var QuestEventGlobalVariable = new Polymer({
 	},
 
 	toXML: function() {
-		var xml = '<QuestEvent xsi:type="' + this.type + '">';
+		var xml = '<QuestEvent xsi:type="' + this.$$('questevent-element').type + '">';
 		xml += this.$$('questevent-element')._toXML();
 		xml += '<VariableName>' + this.variableName + '</VariableName>';
 		xml += '<VariableValue>' + this.variableValue + '</VariableValue>';
@@ -115,7 +126,7 @@ var QuestEventAquire = new Polymer({
 	},
 
 	toXML: function() {
-		var xml = '<QuestEvent xsi:type="' + this.type + '">';
+		var xml = '<QuestEvent xsi:type="' + this.$$('questevent-element').type + '">';
 		xml += this.$$('questevent-element')._toXML();
 		xml += '<Item>' + this.item + '</Item>';
 		xml += '</QuestEvent>';
@@ -142,7 +153,7 @@ var QuestEventInspect = new Polymer({
 	},
 
 	toXML: function() {
-		var xml = '<QuestEvent xsi:type="' + this.type + '">';
+		var xml = '<QuestEvent xsi:type="' + this.$$('questevent-element').type + '">';
 		xml += this.$$('questevent-element')._toXML();
 		xml += '<Item>' + this.item + '</Item>';
 		xml += '</QuestEvent>';
@@ -169,7 +180,7 @@ var QuestEventInteract = new Polymer({
 	},
 
 	toXML: function() {
-		var xml = '<QuestEvent xsi:type="' + this.type + '">';
+		var xml = '<QuestEvent xsi:type="' + this.$$('questevent-element').type + '">';
 		xml += this.$$('questevent-element')._toXML();
 		xml += '<Object>' + this.object + '</Object>';
 		xml += '</QuestEvent>';
@@ -200,7 +211,7 @@ var QuestEventKill = new Polymer({
 	},
 
 	toXML: function() {
-		var xml = '<QuestEvent xsi:type="' + this.type + '">';
+		var xml = '<QuestEvent xsi:type="' + this.$$('questevent-element').type + '">';
 		xml += this.$$('questevent-element')._toXML();
 		xml += '<Target>' + this.target + '</Target>';
 		xml += '<TotalToKill>' + this.totalToKill + '</TotalToKill>';
@@ -228,7 +239,7 @@ var QuestEventLocation = new Polymer({
 	},
 
 	toXML: function() {
-		var xml = '<QuestEvent xsi:type="' + this.type + '">';
+		var xml = '<QuestEvent xsi:type="' + this.$$('questevent-element').type + '">';
 		xml += this.$$('questevent-element')._toXML();
 		xml += '<TriggerObject>' + this.triggerObject + '</TriggerObject>';
 		xml += '</QuestEvent>';
@@ -259,7 +270,7 @@ var QuestEventTalk = new Polymer({
 	},
 
 	toXML: function() {
-		var xml = '<QuestEvent xsi:type="' + this.type + '">';
+		var xml = '<QuestEvent xsi:type="' + this.$$('questevent-element').type + '">';
 		xml += this.$$('questevent-element')._toXML();
 		xml += '<Conversation>' + this.conversation + '</Conversation>';
 		xml += '<NodeID>' + this.nodeId + '</NodeID>';
