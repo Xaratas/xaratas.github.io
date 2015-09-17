@@ -1,46 +1,56 @@
-<link rel="import" href="../bower_components/iron-input/iron-input.html"><link rel="import" href="flowChartNode-behavior.html"><link rel="import" href="comment-element.html"><link rel="import" href="condition-element.html"><link rel="import" href="betterselect-element.html"><link rel="import" href="edit-element.html"><dom-module id="flowchartnode-element"><template><style>
+<link rel="import" href="../bower_components/iron-input/iron-input.html"><link rel="import" href="flowChartNode-behavior.html"><link rel="import" href="comment-element.html"><link rel="import" href="condition-element.html"><link rel="import" href="betterselect-element.html"><link rel="import" href="edit-element.html"><link rel="import" href="../bower_components/paper-material/paper-material.html"><dom-module id="flowchartnode-element"><template><style>
 			:host {
-				background-color: var(--FlowChartNode-element-background-color);
 				width: 260px;
 				display: flex;
+				flex-direction: column;
 				margin: 10px;
 				position: relative;
+				height: 160px;
 			}
 			
-			:host.selected {
+			:host.selected paper-material.outer {
 				background-color: var(--FlowChartNode-element-selected-color);
 			}
-		
-			.direction {
-				float: right;
+			
+			paper-material.outer {
+				background-color: var(--FlowChartNode-element-background-color);
 			}
-		
+			
+			.direction {
+				flex-basis: 40px;
+			}
+			
+			wrapper {
+				display: flex;
+			}	
+			
 			.left, .right, .leftmiddle {
 				width: 40px;
 				padding: 10px 5px;
 				background-color: var(--FlowChartNode-element-popup-target-color);
 				position: relative;
+				height: 113px;
 			}
 		
 			.left {
 				border-top-right-radius: 20px;
 				border-bottom-right-radius: 20px;
-				padding-right: 18px;
+				padding-right: 5px;
 			}
 		
 			.right {
 				border-top-left-radius: 20px;
 				border-bottom-left-radius: 20px;
-				padding-right: 18px;
+				padding-right: 5px;
 			}
 		
 			.leftmiddle {
 				border-radius: 20px;
-				padding: 12px;
 				margin-left: 3px;
 			}
 			.center {
 				margin: 10px;
+				width: 99%; /* comments nehmen allen Platz ein der da ist, 100% macht in chrome nen Übertragsfehler */
 			}
 		
 			.left > span, .leftmiddle > span {
@@ -51,11 +61,11 @@
 			}
 		
 			.leftmiddle > span {
-				transform: translate(-4px, -26px) rotate(90deg);
+				transform: translate(0px, -15px) rotate(90deg);
 				display: flex;
 			}
 			
-			conditions, conditions[hidden], enterScripts, enterScripts[hidden], exitScripts, exitScripts[hidden] {
+			.conditions, .conditions[hidden], .enterScripts, .enterScripts[hidden], .exitScripts, .exitScripts[hidden] {
 				display: none;
 				position: absolute;
 				width: 800px;
@@ -66,7 +76,7 @@
 				padding: 10px;
 			}
 			
-			conditions, enterScripts, exitScripts {
+			.conditions, .enterScripts, .exitScripts {
 				display: block;
 			}
 		
@@ -92,53 +102,83 @@
 				position: absoulte;
 				right: 0;
 			}
-		</style><div class="left" on-tap="toggleConditions"><span>Conditions:&nbsp;<span>[[conditionCount]]</span></span></div><conditions hidden=""><button on-tap="toggleConditions">close</button><button on-tap="addCondition">new</button></conditions><div class="leftmiddle" on-tap="toggleEnterScripts"><span>Enter&nbsp;Scripts:&nbsp;<span>[[enterScripts.length]]</span></span></div><enterscripts hidden=""><button on-tap="toggleEnterScripts">close</button><button on-tap="addEnterScript">new</button></enterscripts><div class="center"><div>Type: <span>{{type}}</span><span class="direction">{{direction}}</span></div><div>ID: <input is="iron-input" bind-value="{{nodeId}}"></div><div>Comments: <button on-click="addComment">Add</button></div><comments></comments><div><button on-click="toggleEdit">edit</button></div></div><div class="right" on-tap="toggleExitScripts"><span>Exit&nbsp;Scripts:&nbsp;<span>[[exitScripts.length]]</span></span></div><exitscripts hidden=""><button on-tap="toggleExitScripts">close</button><button on-tap="addExitScript">new</button></exitscripts><div id="editpanel" class="editPanel" hidden=""><button class="closeButton" on-click="toggleEdit">close</button><template is="dom-repeat" items="{{editElements}}"><edit-element label="{{item.label}}" options="{{item.set}}" value="{{item.value}}" type="{{item.type}}" helptext="{{item.help}}"></edit-element></template></div></template></dom-module><dom-module id="questnode-element"><template><style>
+
+			.xbutton {
+				border-bottom: 1px solid blue;
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+			}
+
+			.xbutton input {
+				max-width: 20px;
+			}
+
+			.type {
+			    max-width: 75px;
+			    overflow: hidden;
+			    text-overflow: ellipsis;
+			}
+		</style><paper-material elevation="{{selected}}" class="outer"><div class="xbutton">Type:&nbsp;<span class="type">{{type}}</span>&nbsp; ID:&nbsp;<input is="iron-input" bind-value="{{nodeId}}"> <span class="direction">{{direction}}</span> <button on-tap="removeSelf">x</button></div><wrapper><div class="left" on-tap="toggleConditions"><span>Conditions:&nbsp;<span>[[conditionCount]]</span></span></div><paper-material elevation="1" class="conditions" id="conditions" hidden=""><conditions><button on-tap="toggleConditions">close</button><button on-tap="addCondition">new</button></conditions></paper-material><div class="leftmiddle" on-tap="toggleEnterScripts"><span>Enter&nbsp;Scripts:&nbsp;<span>[[enterScripts.length]]</span></span></div><paper-material elevation="1" class="enterScripts" id="enterScripts" hidden=""><enterscripts><button on-tap="toggleEnterScripts">close</button><button on-tap="addEnterScript">new</button></enterscripts></paper-material><div class="center"><div>Comments: <button on-click="addComment">Add</button></div><comments></comments><div><button on-click="toggleEdit">edit</button></div></div><div class="right" on-tap="toggleExitScripts"><span>Exit&nbsp;Scripts:&nbsp;<span>[[exitScripts.length]]</span></span></div><paper-material elevation="1" class="exitScripts" id="exitScripts" hidden=""><exitscripts><button on-tap="toggleExitScripts">close</button><button on-tap="addExitScript">new</button></exitscripts></paper-material><div id="editpanel" class="editPanel" hidden=""><button class="closeButton" on-click="toggleEdit">close</button><template is="dom-repeat" items="{{editElements}}"><edit-element label="{{item.label}}" options="{{item.set}}" value="{{item.value}}" type="{{item.type}}" helptext="{{item.help}}"></edit-element></template></div></wrapper></paper-material></template></dom-module><dom-module id="questnode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #96C5F7;
 				--FlowChartNode-element-popup-target-color: #A9D3FF;
 				--FlowChartNode-element-selected-color: #6782A7;
 			}	
-		</style><flowchartnode-element id="flowchartnode" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="objectivenode-element"><template><style>
+		</style><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="objectivenode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #96C5F7;
 				--FlowChartNode-element-popup-target-color: #A9D3FF;
 				--FlowChartNode-element-selected-color: #6782A7;
 			}	
-		</style><flowchartnode-element id="flowchartnode" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="dialoguenode-element"><template><flowchartnode-element id="flowchartnode" direction="{{direction}}" edit-elements="{{addEditControls(editElements)}}"></flowchartnode-element></template></dom-module><dom-module id="talknode-element"><template><style>
+		</style><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="dialoguenode-element"><template><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{addEditControls(editElements)}}"></flowchartnode-element></template></dom-module><dom-module id="talknode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #8FC0A9;
 				--FlowChartNode-element-popup-target-color: #9FD8CB;
 				--FlowChartNode-element-selected-color: #E2EB98;
 			}	
-		</style><dialoguenode-element id="dialoguenode" direction="{{direction}}" edit-elements="{{editElements}}"></dialoguenode-element></template></dom-module><dom-module id="playerresponsenode-element"><template><style>
+		</style><dialoguenode-element id="dialoguenode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></dialoguenode-element></template></dom-module><dom-module id="playerresponsenode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #8FC0A9;
 				--FlowChartNode-element-popup-target-color: #9FD8CB;
 				--FlowChartNode-element-selected-color: #E2EB98;
 			}	
-		</style><dialoguenode-element id="dialoguenode" direction="{{direction}}"></dialoguenode-element></template></dom-module><dom-module id="triggerconversationnode-element"><template><style>
+		</style><dialoguenode-element id="dialoguenode" node-id="{{nodeId}}" direction="{{direction}}"></dialoguenode-element></template></dom-module><dom-module id="triggerconversationnode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #8FC0A9;
 				--FlowChartNode-element-popup-target-color: #9FD8CB;
 				--FlowChartNode-element-selected-color: #E2EB98;
 			}	
-		</style><dialoguenode-element id="dialoguenode" direction="{{direction}}" edit-elements="{{editElements}}"></dialoguenode-element></template></dom-module><dom-module id="banknode-element"><template><style>
+		</style><dialoguenode-element id="dialoguenode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></dialoguenode-element></template></dom-module><dom-module id="banknode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #8FC0A9;
 				--FlowChartNode-element-popup-target-color: #9FD8CB;
 				--FlowChartNode-element-selected-color: #E2EB98;
 			}	
-		</style><flowchartnode-element id="flowchartnode" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="scriptnode-element"><template><style>
+		</style><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="scriptnode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #8FC0A9;
 				--FlowChartNode-element-popup-target-color: #9FD8CB;
 				--FlowChartNode-element-selected-color: #E2EB98;
 			}	
-		</style><dialoguenode-element id="dialoguenode" direction="{{direction}}"></dialoguenode-element></template></dom-module><script>
+		</style><dialoguenode-element id="dialoguenode" node-id="{{nodeId}}" direction="{{direction}}"></dialoguenode-element></template></dom-module><script>
 "use strict";
 	var FlowChartNode = new Polymer({
 		is: "flowchartnode-element",
 		behaviors: [FlowChartNodeBehavior],
+		properties: {
+			/* Umschließende Node */
+			parent_: Object,
+
+			/* Logischer Root Data Elements Punkt */
+			logicalParent: Object,
+
+			/* Paper material Elevation */
+			selected: {
+				type: Number,
+				value: 1
+			}
+		},
 
 		/** Create Links via Drag and Drop */
 		createLink: function(to, orginalThis) {
@@ -146,9 +186,21 @@
 				orginalThis = this;
 			}
 			if (!(to.id in this.links)) {
-				this.links[to.id] = new DialogueLink(orginalThis, to); // TODO QuestLink bei Quests
-				//document.getElementsByTagName("body")[0].appendChild(this.links[to.id]);
-				Polymer.dom(document).querySelector("body").appendChild(this.links[to.id]);
+				if(this.parent_.parent_.is == "questdata-element") {
+					this.links[to.id] = new QuestLink(orginalThis, to);
+				} else {
+					this.links[to.id] = new DialogueLink(orginalThis, to);
+				}
+				// orginalen wrapper finden, 
+				var parentElement;
+				if(this.parentElement.id == this.type + this.nodeId) {
+					// 1 level
+					parentElement = this.parentElement;
+				} else {
+					// 2 level
+					parentElement = this.parentElement.parentElement;
+				}
+				this.logicalParent.appendChild(this.links[to.id]);
 			}
 		},
 
@@ -176,6 +228,55 @@
 					}
 				}
 			}
+		},
+
+		addCondition: function() {
+
+		},
+
+		addEnterScript: function() {
+			var scriptElement = new ScriptElement();
+			scriptElement.fullFunction = PoeQuestEditor.Scripts.get("Int32 GetPlayerMoney()"); // beliebiger Platzhalter
+			this.push("enterScripts", scriptElement);
+			Polymer.dom(this.$$("enterScripts")).appendChild(scriptElement);
+			scriptElement.show();	
+		},
+
+		addExitScript: function() {
+			var scriptElement = new ScriptElement();
+			scriptElement.fullFunction = PoeQuestEditor.Scripts.get("Int32 GetPlayerMoney()"); // beliebiger Platzhalter
+			this.push("exitScripts", scriptElement);
+			Polymer.dom(this.$$("exitScripts")).appendChild(scriptElement);
+			scriptElement.show();	
+		},
+
+		removeSelf: function() {
+			// orginalen wrapper finden, 
+			var parentElement;
+			if(this.parentElement.id == this.type + this.nodeId) {
+				// 1 level
+				parentElement = this.parentElement;
+			} else {
+				// 2 level
+				parentElement = this.parentElement.parentElement;
+			}
+			this.removeLinkTo(parentElement);	
+			Polymer.dom(parentElement.parentElement).removeChild(parentElement);
+			this.logicalParent.node.parentElement.removeNode(parentElement);
+		},
+
+		removeLinkTo: function(toElement) {
+			var parent_;
+			Object.keys(this.links).forEach(function(link) {	
+				if(this.links[link].startElement == toElement) {
+					// ausgehender link auf das gegebene ziel -> entfernen
+					var l = this.links[link];
+					delete this.links[link];
+					this.logicalParent.node.removeChild(l); // TODO find out why node is necesarry
+				}
+			}, this);
+			// eingehender link wird nicht von der node selbst verwaltet
+			this.logicalParent.node.parentElement.removeAllIncommingLinks(toElement);
 		}
 	});
 
@@ -216,10 +317,16 @@
 		factoryImpl: function(parent_) {
 			this.parent_ = parent_;
 			this.links = this.$.flowchartnode.links;
+			this.$.flowchartnode.type = this.type;
+			this.$.flowchartnode.parent_ = this;
 			this.push("editElements", this.experienceType);
 			this.push("editElements", this.experienceLevel);
 		},
 
+		attached: function() {
+			this.$.flowchartnode.logicalParent = this.parent_.logicalParent;
+		}, 
+		
 		createLink: function(to) {
 			this.$.flowchartnode.createLink(to, this);
 		},
@@ -327,7 +434,13 @@
 		factoryImpl: function(parent_) {
 			this.parent_ = parent_;
 			this.links = this.$.flowchartnode.links;
+			this.$.flowchartnode.type = this.type;
+			this.$.flowchartnode.parent_ = this;
 			this.push("editElements", this.experienceWeight);
+		},
+
+		attached: function() {
+			this.$.flowchartnode.logicalParent = this.parent_.logicalParent;
 		},
 
 		createLink: function(to) {
@@ -538,8 +651,14 @@
 		factoryImpl: function(parent_) {
 			this.parent_ = parent_; // da das den UIBehavior konstruktor überschreibt, und man über this.behaviors nicht gehen kann
 			this.links = this.$.dialoguenode.$.flowchartnode.links;
+			this.$.dialoguenode.$.flowchartnode.type = this.type;
+			this.$.dialoguenode.$.flowchartnode.parent_ = this;
 			this.push("editElements", this.speakerGuid);
 			this.push("editElements", this.listenerGuid);
+		},
+
+		attached: function() {
+			this.$.dialoguenode.$.flowchartnode.logicalParent = this.parent_.logicalParent;
 		},
 
 		createLink: function(to) {
@@ -587,6 +706,12 @@
 		factoryImpl: function(parent_) {
 			this.parent_ = parent_;
 			this.links = this.$.dialoguenode.$.flowchartnode.links;
+			this.$.dialoguenode.$.flowchartnode.parent_ = this;
+			this.$.dialoguenode.$.flowchartnode.type = this.type;
+		},
+
+		attached: function() {
+			this.$.dialoguenode.$.flowchartnode.logicalParent = this.parent_.logicalParent;
 		},
 
 		createLink: function(to) {
@@ -633,10 +758,20 @@
 		factoryImpl: function(parent_) {
 			this.parent_ = parent_;
 			this.links = this.$.dialoguenode.$.flowchartnode.links;
+			this.$.dialoguenode.$.flowchartnode.type = this.type;
+			this.$.dialoguenode.$.flowchartnode.parent_ = this;
 			this.push("editElements", this.conversationFilename);
 			this.push("editElements", this.startNodeId);
 		},
 		
+		attached: function() {
+			this.$.dialoguenode.$.flowchartnode.logicalParent = this.parent_.logicalParent;
+		},
+
+		createLink: function(to) {
+			this.$.dialoguenode.$.flowchartnode.createLink(to, this);
+		},
+
 		fromXML: function(xml) {
 			this.nodeId = this.$.dialoguenode.fromXML(xml);
 			if(xml.hasChildNodes()) {
@@ -689,7 +824,13 @@
 		factoryImpl: function(parent_) {
 			this.parent_ = parent_;
 			this.links = this.$.flowchartnode.links;
+			this.$.flowchartnode.type = this.type;
+			this.$.flowchartnode.parent_ = this;
 			this.push("editElements", this.bankNodePlayType);
+		},
+
+		attached: function() {
+			this.$.flowchartnode.logicalParent = this.parent_.logicalParent;
 		},
 
 		createLink: function(to) {
@@ -739,8 +880,14 @@
 		factoryImpl: function(parent_) {
 			this.parent_ = parent_;	
 			this.links = this.$.dialoguenode.$.flowchartnode.links;
+			this.$.dialoguenode.$.flowchartnode.parent_ = this;
+			this.$.dialoguenode.$.flowchartnode.type = this.type;
 		},
-
+		
+		attached: function() {
+			this.$.dialoguenode.$.flowchartnode.logicalParent = this.parent_.logicalParent;
+		}, 
+		
 		createLink: function(to) {
 			this.$.dialoguenode.createLink(to, this);
 		},

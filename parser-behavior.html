@@ -4,7 +4,10 @@
 var ParserBehavior = {
 	properties: {
 		type: String,
-		nextNodeId: Number,
+		nextNodeId: {
+			type: Number,
+			value: 1,
+		},
 		nodes: {
 			type: Array,
 			value: function() { return []; }
@@ -132,12 +135,21 @@ var ParserBehavior = {
 
 	/** Place link targets in buckets, new reachable elements get in a new bucket */
 	place: function(links, i) {
+		var atLeastOne = false;
+		// breite zuerst, mit nur einer schleife wirds tiefe zuerst, dann landen noch mehr linien übereinander
 		Object.keys(links).forEach(function(link) {
-			if(this.buckets[i] === undefined) this.buckets[i] = [];
 			if(links[link].endElement.placed === false) {
+				atLeastOne = true;
+				if(this.buckets[i] === undefined) this.buckets[i] = [];
 				this.buckets[i].push(links[link].endElement);
 				links[link].endElement.placed = true;
-				this.place(links[link].endElement.links, i+1); 
+			}
+		}, this);
+		Object.keys(links).forEach(function(link) {
+			if(links[link].working === undefined) {
+				if(atLeastOne) i += 1;
+				links[link].working = true; // prevent infinite loop on circles
+				this.place(links[link].endElement.links, i);
 			}
 		}, this);
 	},
@@ -147,8 +159,10 @@ var ParserBehavior = {
 		this.nodes.forEach(function(node) {
 			if(node.$.dialoguenode !== undefined) {
 				this.toggleClass("selected", false, node.$.dialoguenode.$.flowchartnode);
+				node.$.dialoguenode.$.flowchartnode.selected = 1;
 			} else {
 				this.toggleClass("selected", false, node.$.flowchartnode);
+				node.$.flowchartnode.selected = 1;
 			}
 			Object.keys(node.links).forEach(function(link) {
 				if(node.links[link].endElement == exceptThis) {
@@ -158,6 +172,35 @@ var ParserBehavior = {
 				}
 			});
 		}, this);
+	},
+
+	removeAllIncommingLinks: function(target) {
+		this.nodes.forEach(function(node) {
+			Object.keys(node.links).forEach(function(link) {
+				if(node.links[link].endElement == target) {
+					var l = node.links[link];
+					delete node.links[link];
+					this.logicalParent.node.removeChild(l);
+				}
+			}, this);
+		}, this);
+	},
+	
+	/* Alle Referenzen auf die Node entfernen */
+	removeNode: function(node) {
+		for(var i = 0; i < this.buckets.length; i++) {
+			for(var j = 0; j < this.buckets[i].length; j++) {
+				if(this.buckets[i][j] == node) {
+					this.buckets[i].splice(j, 1);
+				}
+			}
+		}
+		this.nodes.forEach(function(value, index) {
+			if(value == node) {
+				delete this.nodes[index];
+			}
+		}, this);
+		delete this.nodesMap[node.id];
 	}	
 };
 </script>
