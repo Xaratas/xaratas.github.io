@@ -1,11 +1,11 @@
 <link rel="import" href="../bower_components/iron-input/iron-input.html"><link rel="import" href="flowChartNode-behavior.html"><link rel="import" href="comment-element.html"><link rel="import" href="condition-element.html"><link rel="import" href="betterselect-element.html"><link rel="import" href="edit-element.html"><link rel="import" href="../bower_components/paper-material/paper-material.html"><dom-module id="flowchartnode-element"><template><style>
 			:host {
-				width: 260px;
+				width: 280px;
 				display: flex;
 				flex-direction: column;
 				margin: 10px;
 				position: relative;
-				height: 160px;
+				height: 165px;
 			}
 			
 			:host.selected paper-material.outer {
@@ -111,11 +111,11 @@
 			}
 
 			.xbutton input {
-				max-width: 20px;
+				max-width: 27px; /* Platz für 3 stellige Zahlen */
 			}
 
 			.type {
-			    max-width: 75px;
+			    max-width: 70px;
 			    overflow: hidden;
 			    text-overflow: ellipsis;
 			}
