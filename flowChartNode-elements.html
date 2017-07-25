@@ -137,13 +137,13 @@
 				--FlowChartNode-element-popup-target-color: #A9D3FF;
 				--FlowChartNode-element-selected-color: #6782A7;
 			}	
-		</style><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template><dom-module id="endstatenode-element"><template><style>
+		</style><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="endstatenode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #96C5F7;
 				--FlowChartNode-element-popup-target-color: #A9D3FF;
 				--FlowChartNode-element-selected-color: #6782A7;
 			}	
-		</style><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template><dom-module id="dialoguenode-element"><template><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{addEditControls(editElements)}}"></flowchartnode-element></template></dom-module><dom-module id="talknode-element"><template><style>
+		</style><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{editElements}}"></flowchartnode-element></template></dom-module><dom-module id="dialoguenode-element"><template><flowchartnode-element id="flowchartnode" node-id="{{nodeId}}" direction="{{direction}}" edit-elements="{{addEditControls(editElements)}}"></flowchartnode-element></template></dom-module><dom-module id="talknode-element"><template><style>
 			:host {
 				--FlowChartNode-element-background-color: #8FC0A9;
 				--FlowChartNode-element-popup-target-color: #9FD8CB;
@@ -1073,4 +1073,4 @@
 			return '<FlowChartNode xsi:type="' + this.type + '">' + this.$.dialoguenode.toXML("") + '</FlowChartNode>';
 		}
 	});
-</script></dom-module></dom-module>
+</script>
